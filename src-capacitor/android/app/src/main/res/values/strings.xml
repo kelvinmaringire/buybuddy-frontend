@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Buy Buddy App</string>
+    <string name="title_activity_main">Buy Buddy App</string>
+    <string name="package_name">co.za.buybuddy.app</string>
+    <string name="custom_url_scheme">co.za.buybuddy.app</string>
+</resources>
