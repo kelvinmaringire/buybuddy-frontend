@@ -13,9 +13,9 @@
       >
         <q-route-tab :to="{ name: 'dashboard'}" icon="local_offer" label="Deals" />
         <q-route-tab :to="{ name: 'cart'}" icon="shopping_cart" label="Cart" />
-        <q-tab icon="swap_horiz" label="Requests" />
+        <q-route-tab :to="{ name: 'requests'}" icon="swap_horiz" label="Requests" />
         <q-tab icon="people" label="Buddy" />
-        <q-tab icon="account_circle" label="Profile" />
+        <q-tab icon="account_circle" label="Account" />
       </q-tabs>
       </q-toolbar>
     </q-footer>

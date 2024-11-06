@@ -10,9 +10,6 @@ export const useDealStore = defineStore('deal', {
   }),
 
   getters: {
-    cartDeals (state, shoppingCartId) {
-      return state
-    }
 
   },
 

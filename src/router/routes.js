@@ -14,7 +14,8 @@ const routes = [
     children: [
       { path: '', name: 'dashboard', component: () => import('src/pages/Dashboard/Store/DealsPage.vue') },
       { path: ':id', name: 'deal', component: () => import('src/pages/Dashboard/Store/DealDetailPage.vue') },
-      { path: 'cart', name: 'cart', component: () => import('src/pages/Dashboard/Store/CartPage.vue') }
+      { path: 'cart', name: 'cart', component: () => import('src/pages/Dashboard/Store/CartPage.vue') },
+      { path: 'requests', name: 'requests', component: () => import('src/pages/Dashboard/Store/RequestsPage.vue') }
     ]
   },
 

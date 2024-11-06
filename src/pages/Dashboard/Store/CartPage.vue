@@ -2,16 +2,21 @@
   <q-page padding>
     <h4>Cart</h4>
     <q-list bordered separator class="q-mt-sm">
-      <q-item v-for="deal in deals" :key="deal.id"
-      :to="{ name: 'deal', params: { id: deal.id } }" clickable v-ripple>
+      <q-item v-for="deal in deals" :key="deal.id" v-ripple>
         <q-item-section>
           <q-img
           :src="deal.image_url"
         />
-        <q-item-label class="q-mt-sm">{{ deal.description }}</q-item-label>
-        <q-item-label caption>Caption</q-item-label>
-        <q-item-label overline>Caption</q-item-label>
+        <q-item-label class="q-my-md">{{ deal.description }}</q-item-label>
+        <q-separator />
+        <q-item-label align="center">
+          <q-btn :to="{ name: 'deal', params: { id: deal.id } }" icon="visibility" flat color="primary" >
+            View Deal
+          </q-btn>
+        </q-item-label>
+        <q-separator />
         </q-item-section>
+
       </q-item>
 
     </q-list>
@@ -29,10 +34,21 @@ const authStore = useAuthStore()
 const deals = computed(() => {
   const userId = authStore.userId
   const shoppingList = dealStore.shopping_list
+
+  // Find the user's shopping cart
   const shoppingCart = shoppingList.find((cart) => cart.user === userId)
+
+  // Return an empty array if shoppingCart or deals is not available
+  if (!shoppingCart || !shoppingCart.deals) {
+    return []
+  }
+
   const allDeals = dealStore.deals
   const dealsIds = shoppingCart.deals
-  const deals = dealsIds.map((id) => allDeals.find((d) => d.id === id))
+
+  // Map dealsIds to the corresponding deals and return an empty array if a deal is not found
+  const deals = dealsIds.map((id) => allDeals.find((d) => d.id === id)).filter(d => d)
+
   return deals
 })
 
