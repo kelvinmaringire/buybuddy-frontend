@@ -1,6 +1,16 @@
 <template>
   <q-page padding>
-    <h4>Deals</h4>
+    <q-banner dense inline-actions class="text-white bg-primary q-mb-md">
+      <div class="text-h5">Deals</div>
+      <template v-slot:action>
+        <q-btn flat color="white" icon="search" />
+        <q-btn dense round flat icon="local_offer">
+          <q-badge color="negative" floating transparent>
+            {{ dealsLength }}
+          </q-badge>
+        </q-btn>
+      </template>
+    </q-banner>
     <q-list bordered separator class="q-mt-sm">
       <q-item v-for="deal in dealStore.deals" :key="deal.id" v-ripple>
         <q-item-section>
@@ -24,8 +34,11 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useDealStore } from '../../../stores/deal-store'
 
 const dealStore = useDealStore()
+
+const dealsLength = computed(() => dealStore.deals.length)
 
 </script>

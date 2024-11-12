@@ -6,16 +6,17 @@
     </q-page-container>
 
     <q-footer class="bg-primary text-white">
-      <q-toolbar>
+      <q-toolbar class="justify-center">
         <q-tabs
         no-caps
-        class="text-white flex flex-center q-pb-xs"
+        justify="center"
+        class="text-white q-pb-xs"
       >
         <q-route-tab :to="{ name: 'dashboard'}" icon="local_offer" label="Deals" />
         <q-route-tab :to="{ name: 'cart'}" icon="shopping_cart" label="Cart" />
         <q-route-tab :to="{ name: 'requests'}" icon="swap_horiz" label="Requests" />
-        <q-tab icon="people" label="Buddy" />
-        <q-tab icon="account_circle" label="Account" />
+        <q-route-tab :to="{ name: 'buddy'}" icon="people" label="Buddy" />
+        <q-route-tab :to="{ name: 'account'}" icon="account_circle" label="Account" />
       </q-tabs>
       </q-toolbar>
     </q-footer>

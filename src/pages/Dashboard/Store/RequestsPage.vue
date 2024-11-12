@@ -1,6 +1,16 @@
 <template>
   <q-page padding>
-    <h4>Requests</h4>
+    <q-banner dense inline-actions class="text-white bg-primary q-mb-md">
+      <div class="text-h5">Requests</div>
+      <template v-slot:action>
+        <q-btn dense round flat icon="swap_horiz">
+          <q-badge color="negative" floating transparent>
+            2
+          </q-badge>
+        </q-btn>
+      </template>
+    </q-banner>
+
     <q-list bordered separator class="q-mt-sm">
       <q-item class="q-my-sm" v-for="dealData in sharedInterestDeals" :key="dealData.deal.id" v-ripple>
         <q-item-section>

@@ -1,5 +1,13 @@
 <template>
   <q-page padding>
+
+    <q-banner dense inline-actions class="text-white bg-primary q-mb-md">
+      <q-btn size="lg" flat dense color="white" icon="keyboard_backspace" :to="{ name: 'dashboard'}" />
+      <template v-slot:action>
+        <div class="text-h6">{{deal.title}}</div>
+      </template>
+    </q-banner>
+
     <q-card class="my-card" flat bordered>
       <q-img :src="deal.image_url" />
 
@@ -37,7 +45,10 @@
       <q-separator />
 
       <q-card-actions>
-        <q-btn icon="add_shopping_cart" flat color="positive" v-if="!isInCart" @click="addToCart(cart.id, deal.id)">
+        <q-btn icon="add_shopping_cart" flat color="positive" v-if="!isInCart" @click="createAddToCart(deal.id)"  v-show="!cart">
+          Add to shopping cart.
+        </q-btn>
+        <q-btn icon="add_shopping_cart" flat color="positive" v-if="!isInCart" @click="addToCart(cart.id, deal.id)"  v-show="cart">
           Add to shopping cart.
         </q-btn>
         <q-btn icon="remove_shopping_cart" flat color="negative" v-if="isInCart" @click="removeFromCart(cart.id, deal.id)">
@@ -103,8 +114,31 @@ const cart = computed(() => {
 })
 
 const isInCart = computed(() => {
-  return cart.value.deals.some((item) => item === deal.value.id)
+  // Return false if cart or deal is null, preventing null property access
+  return cart.value && deal.value && cart.value.deals.some((item) => item === deal.value.id)
 })
+
+async function createAddToCart (dealId) {
+  try {
+    await dealStore.createShoppingList({ user: authStore.userId, deals: [dealId] })
+
+    $q.notify({
+      type: 'positive',
+      message: 'Added to cart',
+      position: 'top'
+    })
+
+    // router.push({ name: 'predictions' }) // Make sure to import 'router' if you're using Vue Router
+  } catch (err) {
+    if (err.response.data.detail) {
+      $q.notify({
+        type: 'negative',
+        message: err.response.data.detail,
+        position: 'top'
+      })
+    }
+  }
+}
 
 async function addToCart (shoppingCartId, dealId) {
   try {

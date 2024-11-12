@@ -26,6 +26,11 @@ export const useDealStore = defineStore('deal', {
       const response = await api.get('stores/shopping_list/')
       this.shopping_list = response.data
     },
+    async createShoppingList (list) {
+      console.log(list)
+      const response = await api.post('stores/shopping_list/', list)
+      this.shopping_list.push(response.data)
+    },
     async addToShoppingList (shoppingCartId, dealId) {
       const list = this.shopping_list.find((li) => li.id === shoppingCartId)
       list.deals.push(dealId)
