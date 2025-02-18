@@ -23,7 +23,7 @@
                 <q-btn
                   v-if="buttonState(dealData.deal.id, user.id) === 'accepted'"
                   push icon="chat" color="positive" text-color="white"
-                  label="Chat"
+                  label="Chat" :to="{ name: 'chat', params: { id: getBuddyId(dealData.deal.id, user.id) } }"
                 />
               </div>
             </div>
@@ -105,5 +105,24 @@ function currentRequest (dealId, recipientId) {
       ((request.requester === requesterId && request.recipient === recipientId) ||
         (request.requester === recipientId && request.recipient === requesterId))
   )
+}
+function getBuddyId (dealId, userId) {
+  const buddies = buddyStore.buddies // Assuming this is your list of buddies
+  const request = currentRequest(dealId, userId) // Get the request for the given deal and user
+
+  if (!request) {
+    return null // No request found
+  }
+
+  // Find the buddy relationship that matches the request's requester and recipient
+  const buddy = buddies.find(
+    b =>
+      b.deal === dealId &&
+      ((b.requester === request.requester && b.recipient === request.recipient) ||
+        (b.requester === request.recipient && b.recipient === request.requester))
+  )
+
+  // Return the buddyId if a matching relationship is found
+  return buddy ? buddy.id : null
 }
 </script>

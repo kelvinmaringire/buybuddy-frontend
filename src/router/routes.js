@@ -17,6 +17,7 @@ const routes = [
       { path: 'cart', name: 'cart', component: () => import('src/pages/Dashboard/Store/CartPage.vue') },
       { path: 'requests', name: 'requests', component: () => import('src/pages/Dashboard/Store/RequestsPage.vue') },
       { path: 'buddy', name: 'buddy', component: () => import('src/pages/Dashboard/Store/BuddyPage.vue') },
+      { path: ':id', name: 'chat', component: () => import('src/pages/Dashboard/Store/ChatPage.vue') },
       { path: 'account', name: 'account', component: () => import('src/pages/Dashboard/Account/AccountPage.vue') }
     ]
   },

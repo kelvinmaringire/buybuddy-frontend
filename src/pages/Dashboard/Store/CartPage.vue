@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
-    <q-banner dense inline-actions class="text-white bg-primary q-mb-md">
-      <div class="text-h5">My Cart</div>
+    <q-banner dense inline-actions class="text-white bg-primary q-mb-sm">
+      <div class="text-h5">Wish List</div>
       <template v-slot:action>
         <q-btn flat color="white" icon="search" />
         <q-btn dense round flat icon="shopping_cart">
@@ -12,25 +12,28 @@
       </template>
     </q-banner>
 
-    <q-list bordered separator class="q-mt-sm">
-      <q-item v-for="deal in deals" :key="deal.id" v-ripple>
-        <q-item-section>
-          <q-img
-          :src="deal.image_url"
-        />
-        <q-item-label class="q-my-md">{{ deal.description }}</q-item-label>
-        <q-separator />
-        <q-item-label align="center">
-          <q-btn :to="{ name: 'deal', params: { id: deal.id } }" icon="visibility" flat color="primary" >
-            View Deal
-          </q-btn>
-        </q-item-label>
-        <q-separator />
-        </q-item-section>
+    <q-list bordered separator dense class="q-mt-sm">
+      <q-item clickable v-ripple v-for="deal in deals" :key="deal.id" :to="{ name: 'deal', params: { id: deal.id } }">
+        <q-card class="my-card" flat>
+          <q-card-section horizontal>
+            <q-card-section>
+              <img :src="deal.image_url" alt="pic" style="height: 100px; width: auto;" />
+            </q-card-section>
 
+            <q-card-section>
+              <div class="text-h6 q-mt-sm q-mb-xs text-dark">{{ deal.title }}</div>
+              <div class="text-caption text-blue-grey-10">
+                {{ deal.description }}
+              </div>
+              <div class="text-caption text-grey">
+                Hermanus | 1.53km
+              </div>
+            </q-card-section>
+          </q-card-section>
+        </q-card>
       </q-item>
-
     </q-list>
+
   </q-page>
 </template>
 
@@ -66,3 +69,14 @@ const deals = computed(() => {
 const dealsLength = computed(() => deals.value.length)
 
 </script>
+
+<style scoped>
+
+.q-card__section--vert {
+    padding: 5px;
+}
+
+.q-list--dense > .q-item, .q-item--dense {
+    padding: 0px;
+}
+</style>
