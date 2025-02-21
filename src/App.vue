@@ -29,6 +29,7 @@ async function initStore () {
   await buddyStore.fetchBuddies()
   await buddyStore.fetchReviewBuddies()
   await buddyStore.fetchNotifications()
+  await buddyStore.fetchChatMessages()
 }
 
 // Call the initialization function

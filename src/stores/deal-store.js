@@ -27,22 +27,21 @@ export const useDealStore = defineStore('deal', {
       this.shopping_list = response.data
     },
     async createShoppingList (list) {
-      console.log(list)
+      console.log(list.deals)
       const response = await api.post('stores/shopping_list/', list)
       this.shopping_list.push(response.data)
     },
     async addToShoppingList (shoppingCartId, dealId) {
+      console.log('add')
       const list = this.shopping_list.find((li) => li.id === shoppingCartId)
       list.deals.push(dealId)
-      const response = await api.put(`stores/shopping_list/${shoppingCartId}/`, list)
-      console.log(response.data)
+      await api.put(`stores/shopping_list/${shoppingCartId}/`, list)
     },
     async removeFromShoppingList (shoppingCartId, dealId) {
       const list = this.shopping_list.find((li) => li.id === shoppingCartId)
       const index = list.deals.indexOf(dealId)
       list.deals.splice(index, 1)
-      const response = await api.put(`stores/shopping_list/${shoppingCartId}/`, list)
-      console.log(response.data)
+      await api.put(`stores/shopping_list/${shoppingCartId}/`, list)
     }
 
   }

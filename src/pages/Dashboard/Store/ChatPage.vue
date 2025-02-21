@@ -31,7 +31,7 @@
 
     <!-- Chat Input -->
     <div class="chat-input-container">
-      <q-input filled dense v-model="message" color="positive" placeholder="Message" class="chat-input">
+      <q-input filled dense v-model="message" @keyup.enter="sendMessage" color="positive" placeholder="Message" class="chat-input">
         <template v-slot:after>
           <q-btn round dense flat color="positive" icon="send" @click="sendMessage" />
         </template>
@@ -41,11 +41,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../../../stores/auth-store'
+import { useBuddyStore } from '../../../stores/buddy-store'
 
 const authStore = useAuthStore()
+const buddyStore = useBuddyStore()
 const route = useRoute()
 const router = useRouter()
 const roomName = ref(route.params.id)
@@ -53,35 +55,40 @@ const message = ref('')
 const isLoading = ref(false)
 let chatSocket
 
-// Sample Chat Log
-const chatLog = ref([
-  { label: 'Sunday, 19th', id: 1 },
-  { id: 2, name: 'Me', message: 'Hey, how are you?', sent: true, stamp: '10:00' },
-  { id: 3, name: 'Jane', message: 'Doing fine, how r you?', stamp: '10:05' }
-])
-
 const chatContainer = ref(null)
 
+const scrollToBottom = () => {
+  if (chatContainer.value) {
+    // Adjust scroll position to account for the chat input container height
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight - chatContainer.value.clientHeight + 65
+  }
+}
+
+const chatLog = computed(() => {
+  return buddyStore.processedMessages(JSON.parse(roomName.value))
+})
+
 // WebSocket Setup
-onMounted(() => {
+onMounted(async () => {
+  await buddyStore.fetchChatMessages()
+
   chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomName.value}/`)
 
   chatSocket.onmessage = (e) => {
     const data = JSON.parse(e.data)
     console.log(data)
-    chatLog.value.push({
-      id: chatLog.value.length + 1,
-      name: 'Jane',
-      message: data.message,
-      stamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sent: false
-    })
+    buddyStore.addMessage(data)
+    scrollToBottom()
   }
 
   chatSocket.onclose = () => {
     console.error('Chat socket closed unexpectedly')
     router.push({ name: 'buddy' })
   }
+
+  setTimeout(() => {
+    scrollToBottom()
+  }, 100)
 })
 
 onBeforeUnmount(() => {
@@ -94,18 +101,15 @@ const sendMessage = () => {
   if (message.value.trim() && chatSocket.readyState === WebSocket.OPEN) {
     chatSocket.send(JSON.stringify({ message: message.value, roomName: roomName.value, sender: authStore.userId }))
 
-    // Add the message immediately
-    chatLog.value.push({
-      id: chatLog.value.length + 1,
-      name: 'Me',
-      message: message.value,
-      stamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sent: true
-    })
-
     message.value = ''
   }
 }
+
+watch(chatLog, () => {
+  setTimeout(() => {
+    scrollToBottom()
+  }, 100) // Small delay to ensure DOM updates
+})
 </script>
 
 <style scoped>
@@ -127,7 +131,7 @@ const sendMessage = () => {
 .chat-content {
   flex: 1;
   overflow-y: auto;
-  max-height: calc(100vh - 120px); /* Adjust based on header & input height */
+  max-height: calc(100vh - 185px); /* Adjusted for header & input height */
   padding: 10px;
   display: flex;
   flex-direction: column;

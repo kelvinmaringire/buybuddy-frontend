@@ -1,14 +1,13 @@
 <template>
   <q-page padding>
-
     <q-banner dense inline-actions class="text-white bg-primary q-mb-md">
       <q-btn size="lg" flat dense color="white" icon="keyboard_backspace" :to="{ name: 'dashboard'}" />
       <template v-slot:action>
-        <div class="text-h6">{{deal.title}}</div>
+        <div class="text-h6" v-if="deal">{{ deal.title }}</div>
       </template>
     </q-banner>
 
-    <q-card class="my-card" flat bordered>
+    <q-card class="my-card" flat bordered v-if="deal">
       <q-img :src="deal.image_url" />
 
       <q-card-section>
@@ -60,8 +59,7 @@
 </template>
 
 <script setup>
-
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useDealStore } from '../../../stores/deal-store'
@@ -184,4 +182,8 @@ async function removeFromCart (shoppingCartId, dealId) {
   }
 }
 
+// Fetch deals on component mount
+onMounted(async () => {
+  await dealStore.fetchDeals()
+})
 </script>
