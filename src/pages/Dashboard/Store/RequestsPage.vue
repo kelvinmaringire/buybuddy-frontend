@@ -12,12 +12,22 @@
     </q-banner>
 
     <q-list bordered separator class="q-mt-sm">
-      <q-item class="q-my-sm" v-for="dealData in sharedInterestDeals" :key="dealData.deal.id" v-ripple>
+      <q-item class="q-my-sm" v-for="dealData in sharedInterestDeals" :key="dealData.deal.id">
         <q-item-section>
-          <q-img
-          :src="dealData.deal.image_url"
-        />
-        <q-item-label class="q-my-md">{{ dealData.deal.description }}</q-item-label>
+        <q-card class="my-card" flat>
+          <q-card-section horizontal>
+            <q-card-section>
+              <img :src="dealData.deal.image_url" alt="pic" style="height: 100px; width: auto;" />
+            </q-card-section>
+
+            <q-card-section>
+              <div class="text-h6 q-mt-sm q-mb-xs text-dark">{{ dealData.deal.title }}</div>
+              <div class="text-caption text-blue-grey-10">
+                {{ dealData.deal.description }}
+              </div>
+            </q-card-section>
+          </q-card-section>
+        </q-card>
 
         <q-item-label v-for="user in dealData.users" :key="user.id">
           <div class="row justify-between q-mb-sm">
