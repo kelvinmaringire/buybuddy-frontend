@@ -1,0 +1,10 @@
+{
+  "apps": [
+    {
+      "appId": "co.za.buybuddy.app",
+      "root": "src-capacitor",
+      "dependencyInstallCommand": "cd .. && npm install",
+      "webBuildCommand": "cd .. && npx quasar build -m capacitor -T ios --skip-pkg && npx quasar build -m capacitor -T android --skip-pkg"
+    }
+  ]
+}
