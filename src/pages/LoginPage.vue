@@ -91,6 +91,7 @@ async function onLogin () {
     })
   } else {
     try {
+      credentials.value.username = credentials.value.username.trim().toLowerCase()
       // Call the doLogin action from the Pinia store with the provided credentials
       await authStore.doLogin(credentials.value)
 

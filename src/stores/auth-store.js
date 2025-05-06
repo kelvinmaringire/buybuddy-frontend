@@ -50,8 +50,10 @@ export const useAuthStore = defineStore('auth', {
       this.getMe(response.data)
     },
 
-    async doContact (formData) {
-      await api.post('contact_form/', formData)
+    async doRegister (credentials) {
+      const response = await api.post('accounts/', credentials)
+      console.log(response.data)
+      this.users.push(response.data)
     },
 
     logout () {

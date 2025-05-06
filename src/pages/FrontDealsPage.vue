@@ -11,7 +11,7 @@
         </q-btn>
       </template>
     </q-banner>
-    <div v-show="searchAddress">
+    <!--div v-show="searchAddress">
       <form>
         <input
           id="place"
@@ -22,8 +22,8 @@
         />
         <q-btn class="glossy" color="primary" label="Close" push no-caps @click="searchAddress = false" />
       </form>
-    </div>
-    <div v-show="!searchAddress" class="q-mb-md">
+    </div-->
+    <!--div v-show="!searchAddress" class="q-mb-md">
       <form >
         <q-btn class="glossy" color="primary" label="Change current location" push @click="searchAddress = true" />
       </form>
@@ -33,7 +33,7 @@
         <p><strong>Latitude:</strong> {{ (selectedPlace.geometry.viewport.ii.lo + selectedPlace.geometry.viewport.ii.hi) / 2 }}</p>
         <p><strong>Longitude:</strong> {{ (selectedPlace.geometry.viewport.Gh.lo + selectedPlace.geometry.viewport.Gh.hi) / 2 }}</p>
       </div>
-    </div>
+    </div-->
 
     <q-list bordered separator dense>
       <q-item clickable v-ripple v-for="deal in dealStore.deals" :key="deal.id" :to="{ name: 'front_deal', params: { id: deal.id } }">
@@ -69,7 +69,7 @@ const dealsLength = computed(() => dealStore.deals.length)
 
 // Places API AIzaSyD7NL9oNrApHfBlz1YL52_QoHcJYDvpHGQ
 
-const placeInput = ref('')
+// const placeInput = ref('')
 const selectedPlace = ref(null)
 const autocompleteInput = ref(null)
 

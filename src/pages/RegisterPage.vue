@@ -24,14 +24,22 @@
          </div>
        </q-card-section>
        <q-card-section>
-         <q-form class="q-gutter-md">
-           <q-input label="Username">
+         <q-form class="q-gutter-md" @submit.prevent="onRegister">
+           <q-input label="Username" v-model="credentials.username">
            </q-input>
-           <q-input label="email">
+           <q-input label="email" v-model="credentials.email">
            </q-input>
-           <q-input label="Password" type="password">
+           <q-input
+           label="Password" :type="isPwd ? 'password' : 'text'" v-model="credentials.password">
+             <template v-slot:append>
+               <q-icon
+                 :name="isPwd ? 'visibility_off' : 'visibility'"
+                 class="cursor-pointer"
+                 @click="isPwd = !isPwd"
+               />
+             </template>
            </q-input>
-           <q-input label="Confirm Password" type="password">
+           <q-input label="Confirm Password" :type="isPwd ? 'password' : 'text'" v-model="credentials.confirm_password">
            </q-input>
            <div>
              <q-btn class="full-width" color="primary" label="register" type="submit" rounded>
@@ -51,10 +59,106 @@
   </q-page>
 </template>
 
-<script>
-export default {
-  // name: 'PageName',
+<script setup>
+
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useAuthStore } from '../stores/auth-store'
+
+defineOptions({
+  name: 'RegisterPage'
+})
+
+const authStore = useAuthStore()
+const router = useRouter()
+const $q = useQuasar()
+
+const isPwd = ref(true)
+const credentials = ref({
+  username: '',
+  email: '',
+  password: '',
+  confirm_password: ''
+
+})
+
+async function onRegister () {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  // Fetch all existing users from the store (make sure your store supports this)
+  const existingUsers = authStore.users || [] // or await authStore.fetchUsers() if it's async
+
+  const usernameExists = existingUsers.some(user => user.username.toLowerCase() === credentials.value.username)
+  const emailExists = existingUsers.some(user => user.email.toLowerCase() === credentials.value.email)
+
+  if (!credentials.value.username || !credentials.value.email || !credentials.value.password || !credentials.value.confirm_password) {
+    $q.notify({
+      type: 'negative',
+      message: 'All fields are required.',
+      position: 'top'
+    })
+  } else if (!emailRegex.test(credentials.value.email)) {
+    $q.notify({
+      type: 'negative',
+      message: 'Please enter a valid email address.',
+      position: 'top'
+    })
+  } else if (credentials.value.password.length < 6) {
+    $q.notify({
+      type: 'negative',
+      message: 'The password must have 6 or more characters.',
+      position: 'top'
+    })
+  } else if (credentials.value.password !== credentials.value.confirm_password) {
+    $q.notify({
+      type: 'negative',
+      message: 'Passwords do not match.',
+      position: 'top'
+    })
+  } else if (usernameExists) {
+    $q.notify({
+      type: 'negative',
+      message: 'Username is already registered.',
+      position: 'top'
+    })
+  } else if (emailExists) {
+    $q.notify({
+      type: 'negative',
+      message: 'Email is already registered.',
+      position: 'top'
+    })
+  } else {
+    try {
+      credentials.value.username = credentials.value.username.trim().toLowerCase()
+
+      const registrationData = {
+        username: credentials.value.username,
+        email: credentials.value.email,
+        password: credentials.value.password
+      }
+
+      await authStore.doRegister(registrationData)
+
+      $q.notify({
+        type: 'positive',
+        message: 'Registration Successful.',
+        position: 'top'
+      })
+
+      router.push({ name: 'login' }) // Make sure to import 'router' if you're using Vue Router
+    } catch (err) {
+      if (err.response.data.detail) {
+        $q.notify({
+          type: 'negative',
+          message: err.response.data.detail,
+          position: 'top'
+        })
+      }
+    }
+  }
 }
+
 </script>
 
 <style scoped>

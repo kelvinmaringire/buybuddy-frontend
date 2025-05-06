@@ -45,6 +45,7 @@ import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../../../stores/auth-store'
 import { useBuddyStore } from '../../../stores/buddy-store'
+// import { api } from '../../../boot/axios'
 
 const authStore = useAuthStore()
 const buddyStore = useBuddyStore()
@@ -74,9 +75,12 @@ onMounted(async () => {
 
   chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomName.value}/`)
 
+  // chatSocket = new WebSocket(`ws://167.71.130.8:8000/ws/chat/${roomName.value}/`)
+
+  // chatSocket = new WebSocket(`wss://buybuddysave.co.za/ws/chat/${roomName.value}/`)
+
   chatSocket.onmessage = (e) => {
     const data = JSON.parse(e.data)
-    console.log(data)
     buddyStore.addMessage(data)
     scrollToBottom()
   }
@@ -98,10 +102,13 @@ onBeforeUnmount(() => {
 })
 
 const sendMessage = () => {
+  console.log('hi')
   if (message.value.trim() && chatSocket.readyState === WebSocket.OPEN) {
     chatSocket.send(JSON.stringify({ message: message.value, roomName: roomName.value, sender: authStore.userId }))
 
     message.value = ''
+  } else {
+    console.error('WebSocket is not open')
   }
 }
 

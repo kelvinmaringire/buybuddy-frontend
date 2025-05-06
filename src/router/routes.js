@@ -4,7 +4,7 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', name: 'deals', component: () => import('pages/FrontDealsPage.vue') },
-      { path: ':id', name: 'front_deal', component: () => import('src/pages/Dashboard/Store/FrontDealDetailPage.vue') },
+      { path: ':id', name: 'front_deal', component: () => import('pages/FrontDealDetailPage.vue') },
       { path: 'login', name: 'login', component: () => import('pages/LoginPage.vue') },
       { path: 'register', name: 'register', component: () => import('pages/RegisterPage.vue') },
       { path: 'password_reset', name: 'password_reset', component: () => import('pages/ForgotPasswordPage.vue') }
