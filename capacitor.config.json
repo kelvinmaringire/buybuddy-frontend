@@ -1,6 +1,6 @@
 {
   "appId": "co.za.buybuddy.app",
   "appName": "Buy Buddy",
-  "webDir": "dist/capacitor",
+  "webDir": "dist/spa",
   "bundledWebRuntime": false
 }
