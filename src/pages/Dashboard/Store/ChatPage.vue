@@ -73,11 +73,11 @@ const chatLog = computed(() => {
 onMounted(async () => {
   await buddyStore.fetchChatMessages()
 
-  chatSocket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${roomName.value}/`)
+  // chatSocket = new WebSocket(`ws://local:800/ws/chat/${roomName.value}/`)
 
   // chatSocket = new WebSocket(`ws://167.71.130.8:8000/ws/chat/${roomName.value}/`)
 
-  // chatSocket = new WebSocket(`wss://buybuddysave.co.za/ws/chat/${roomName.value}/`)
+  chatSocket = new WebSocket(`wss://buybuddysave.co.za/ws/chat/${roomName.value}/`)
 
   chatSocket.onmessage = (e) => {
     const data = JSON.parse(e.data)
