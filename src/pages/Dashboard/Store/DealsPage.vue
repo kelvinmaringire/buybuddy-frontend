@@ -76,29 +76,37 @@ const autocompleteInput = ref(null)
 const searchAddress = ref(false)
 
 onMounted(() => {
-  if (!window.google) {
-    console.error('Google Maps JavaScript API is not loaded.')
+  // eslint-disable-next-line no-undef
+  if (!window.google || !google.maps.places.Autocomplete) {
+    console.error('Google Maps JavaScript API or Autocomplete is not loaded.')
+    return
+  }
+
+  const inputElement = autocompleteInput.value
+
+  if (!inputElement) {
+    console.error('Input element not found.')
     return
   }
 
   // eslint-disable-next-line no-undef
-  const autocomplete = new google.maps.places.Autocomplete(autocompleteInput.value, {
-    types: ['establishment'], // Specify the type of place (optional)
-    // fields: ['ALL']
-    fields: ['place_id', 'name', 'formatted_address', 'geometry'] // Specify the data you want
+  const autocomplete = new google.maps.places.Autocomplete(inputElement, {
+    componentRestrictions: { country: 'za' },
+    fields: ['place_id', 'name', 'formatted_address', 'geometry']
   })
 
   autocomplete.addListener('place_changed', () => {
     const place = autocomplete.getPlace()
-    if (place) {
+    if (place && place.geometry && place.geometry.location) {
       selectedPlace.value = place
-      // Calculate the center of the viewport
-      const lat = (place.geometry.viewport.ii.lo + place.geometry.viewport.ii.hi) / 2
-      const lng = (place.geometry.viewport.Gh.lo + place.geometry.viewport.Gh.hi) / 2
+
+      const lat = place.geometry.location.lat()
+      const lng = place.geometry.location.lng()
+
       console.log(lat, lng)
       searchAddress.value = false
     } else {
-      console.error('No place details available.')
+      console.error('No place geometry available.')
     }
   })
 })
