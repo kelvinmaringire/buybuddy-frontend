@@ -27,16 +27,10 @@
       <form >
         <q-btn class="glossy" color="primary" label="Change current location" push @click="searchAddress = true" />
       </form>
-      <div v-if="selectedPlace" class="q-mt-xs">
-        <p><strong>Name:</strong> {{ selectedPlace.name }}</p>
-        <p><strong>Address:</strong> {{ selectedPlace.formatted_address }}</p>
-        <p><strong>Latitude:</strong> {{ (selectedPlace.geometry.viewport.ii.lo + selectedPlace.geometry.viewport.ii.hi) / 2 }}</p>
-        <p><strong>Longitude:</strong> {{ (selectedPlace.geometry.viewport.Gh.lo + selectedPlace.geometry.viewport.Gh.hi) / 2 }}</p>
-      </div>
     </div>
 
     <q-list bordered separator dense>
-      <q-item clickable v-ripple v-for="deal in dealStore.deals" :key="deal.id" :to="{ name: 'deal', params: { id: deal.id } }">
+      <q-item clickable v-ripple v-for="deal in displayedDeals" :key="deal.id" :to="{ name: 'deal', params: { id: deal.id } }">
         <q-card class="my-card" flat>
           <q-card-section horizontal>
             <q-card-section>
@@ -49,7 +43,7 @@
                 {{ deal.description }}
               </div>
               <div class="text-caption text-grey">
-                Hermanus | 1.53km
+                {{deal.store_address}} | {{ deal.distanceKm }}km
               </div>
             </q-card-section>
           </q-card-section>
@@ -60,12 +54,14 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useDealStore } from '../../../stores/deal-store'
+import { useAuthStore } from '../../../stores/auth-store'
 
 const dealStore = useDealStore()
+const authStore = useAuthStore()
 
-const dealsLength = computed(() => dealStore.deals.length)
+const dealsLength = computed(() => dealStore.geoDeals.length)
 
 // Places API AIzaSyD7NL9oNrApHfBlz1YL52_QoHcJYDvpHGQ
 
@@ -75,7 +71,7 @@ const autocompleteInput = ref(null)
 
 const searchAddress = ref(false)
 
-onMounted(() => {
+onMounted(async () => {
   // eslint-disable-next-line no-undef
   if (!window.google || !google.maps.places.Autocomplete) {
     console.error('Google Maps JavaScript API or Autocomplete is not loaded.')
@@ -96,21 +92,58 @@ onMounted(() => {
   })
 
   autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace()
-    if (place && place.geometry && place.geometry.location) {
-      selectedPlace.value = place
+    (async () => {
+      const place = autocomplete.getPlace()
+      if (place && place.geometry && place.geometry.location) {
+        selectedPlace.value = place
 
-      const lat = place.geometry.location.lat()
-      const lng = place.geometry.location.lng()
+        const lat = place.geometry.location.lat()
+        const lng = place.geometry.location.lng()
 
-      console.log(lat, lng)
-      searchAddress.value = false
-    } else {
-      console.error('No place geometry available.')
-    }
+        const user = {
+          id: authStore.userId,
+          location: {
+            type: 'Point',
+            coordinates: [lng, lat]
+          }
+        }
+
+        try {
+          await authStore.editPartialUser(user)
+          searchAddress.value = false
+          // Force update deals calculation
+          dealStore.updateDealsForNewLocation()
+        } catch (error) {
+          console.error('Failed to update user:', error)
+        }
+      } else {
+        console.error('No place geometry available.')
+      }
+    })()
   })
 })
 
+// Add this computed property to force updates when location changes
+const locationDependentDeals = computed(() => {
+  return {
+    deals: dealStore.geoDeals,
+    timestamp: dealStore.lastLocationUpdate
+  }
+})
+
+// Watch for changes in the user's location
+watch(
+  () => authStore.profile?.location,
+  (newLocation) => {
+    if (newLocation) {
+      dealStore.updateDealsForNewLocation()
+    }
+  },
+  { deep: true }
+)
+
+// Update your template to use locationDependentDeals instead of dealStore.geoDeals directly
+const displayedDeals = computed(() => locationDependentDeals.value.deals)
 </script>
 
 <style scoped>

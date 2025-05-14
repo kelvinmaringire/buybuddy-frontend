@@ -40,6 +40,12 @@ export const useAuthStore = defineStore('auth', {
       const response = await api.get('accounts/')
       this.users = response.data
     },
+    async editPartialUser (user) {
+      const response = await api.patch(`accounts/${user.id}/`, user)
+      const indexUser = this.users.find(u => u.id === user.id)
+      const index = this.users.indexOf(indexUser)
+      this.users[index] = response.data
+    },
     async doLogin (credentials) {
       const response = await api.post('api/token/', credentials)
 
@@ -55,7 +61,6 @@ export const useAuthStore = defineStore('auth', {
       console.log(response.data)
       this.users.push(response.data)
     },
-
     logout () {
       api.defaults.headers.common.Authorization = ''
       this.token = ''
