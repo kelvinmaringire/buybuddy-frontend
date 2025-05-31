@@ -7,19 +7,19 @@
     </q-banner>
 
     <q-list separator bordered class="q-mb-lg">
-      <q-item clickable v-ripple>
+      <q-item :to="{name: 'profile'}" clickable v-ripple>
         <q-item-section class="text-h5 text-weight-light">
           Profile Settings
         </q-item-section>
       </q-item>
 
-      <q-item clickable v-ripple>
+      <!--q-item clickable v-ripple>
         <q-item-section class="text-h5 text-weight-light">
           Buddy Reviews
         </q-item-section>
-      </q-item>
+      </q-item-->
 
-      <q-item clickable v-ripple>
+      <q-item :to="{name: 'change_password'}"  clickable v-ripple>
         <q-item-section class="text-h5 text-weight-light">
           Password Change
         </q-item-section>

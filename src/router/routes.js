@@ -20,7 +20,9 @@ const routes = [
       { path: 'requests', name: 'requests', component: () => import('src/pages/Dashboard/Store/RequestsPage.vue') },
       { path: 'buddy', name: 'buddy', component: () => import('src/pages/Dashboard/Store/BuddyPage.vue') },
       { path: 'buddy/:id', name: 'chat', component: () => import('src/pages/Dashboard/Store/ChatPage.vue') },
-      { path: 'account', name: 'account', component: () => import('src/pages/Dashboard/Account/AccountPage.vue') }
+      { path: 'account', name: 'account', component: () => import('src/pages/Dashboard/Account/AccountPage.vue') },
+      { path: 'profile', name: 'profile', component: () => import('src/pages/Dashboard/Account/ProfilePage.vue') },
+      { path: 'change_password', name: 'change_password', component: () => import('src/pages/Dashboard/Account/ChangePasswordPage.vue') }
     ]
   },
 

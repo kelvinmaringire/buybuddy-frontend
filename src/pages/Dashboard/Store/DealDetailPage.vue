@@ -1,14 +1,14 @@
 <template>
   <q-page padding>
     <q-banner dense inline-actions class="text-white bg-primary q-mb-md">
-      <q-btn size="lg" flat dense color="white" icon="keyboard_backspace" :to="{ name: 'dashboard'}" />
+      <q-btn size="lg" flat dense color="white" icon="keyboard_backspace" @click="$router.go(-1)" />
       <template v-slot:action>
         <div class="text-h6" v-if="deal">{{ deal.title }}</div>
       </template>
     </q-banner>
 
     <q-card class="my-card" flat bordered v-if="deal">
-      <q-img :src="deal.image_url" />
+    <q-img :src="deal.image_url" style="max-height: 300px; object-fit: cover;" />
 
       <q-card-section>
         <q-btn
@@ -24,13 +24,62 @@
             {{ deal.title }}
           </div>
           <div class="col-auto text-grey text-caption q-pt-md row no-wrap items-center">
-            <q-icon name="place" />
-            250 ft
+            <q-icon name="place" size="25px" />
+            {{ deal.distanceKm }} km
           </div>
         </div>
-
-        <q-rating v-model="stars" :max="5" size="32px" />
       </q-card-section>
+
+      <q-card-actions>
+        <div class="row justify-around q-pa-md full-width">
+          <!-- Directions Button -->
+          <div class="column items-center q-px-sm">
+            <q-btn
+              round
+              color="primary"
+              icon="directions"
+              size="md"
+              @click="openDirections"
+            />
+            <div class="text-caption q-mt-xs text-center">Directions</div>
+          </div>
+
+          <!-- Wishlist Button -->
+          <div class="column items-center q-px-sm">
+            <q-btn round color="red" icon="favorite" size="md" v-if="!isInCart" @click="createAddToCart(deal.id)"  v-show="!cart"/>
+            <div class="text-caption q-mt-xs text-center" v-if="!isInCart" @click="createAddToCart(deal.id)"  v-show="!cart">Add to wishlist</div>
+            <q-btn round color="red" icon="favorite" size="md" v-if="!isInCart" @click="addToCart(cart.id, deal.id)" v-show="cart"/>
+            <div class="text-caption q-mt-xs text-center" v-if="!isInCart" @click="addToCart(cart.id, deal.id)" v-show="cart">Add to wishlist</div>
+            <q-btn round color="warning" icon="heart_broken" size="md" v-if="isInCart" @click="removeFromCart(cart.id, deal.id)"/>
+            <div class="text-caption q-mt-xs text-center" v-if="isInCart" @click="removeFromCart(cart.id, deal.id)">Remove listing</div>
+          </div>
+
+          <!-- Call Button -->
+          <div class="column items-center q-px-sm">
+            <q-btn
+              round
+              color="green"
+              icon="call"
+              size="md"
+              @click="callStore"
+              :disable="!deal?.store_phone_number"
+            />
+            <div class="text-caption q-mt-xs text-center">Call</div>
+          </div>
+
+          <!-- Rate Button -->
+          <!--div class="column items-center q-px-sm">
+            <q-btn
+              round
+              color="amber"
+              icon="star_rate"
+              size="md"
+              @click="rateDeal"
+            />
+            <div class="text-caption q-mt-xs text-center">Rate Now</div>
+          </div-->
+        </div>
+      </q-card-actions>
 
       <q-card-section class="q-pt-none">
         <div class="text-subtitle1">
@@ -39,33 +88,26 @@
         <div class="text-caption text-grey">
           {{ deal.description }}
         </div>
+          <!--q-rating v-model="stars" :max="5" size="32px" /-->
       </q-card-section>
 
       <q-separator />
 
-      <q-card-actions>
-        <q-btn icon="add_shopping_cart" flat color="positive" v-if="!isInCart" @click="createAddToCart(deal.id)"  v-show="!cart">
-          Add to shopping cart.
-        </q-btn>
-        <q-btn icon="add_shopping_cart" flat color="positive" v-if="!isInCart" @click="addToCart(cart.id, deal.id)"  v-show="cart">
-          Add to shopping cart.
-        </q-btn>
-        <q-btn icon="remove_shopping_cart" flat color="negative" v-if="isInCart" @click="removeFromCart(cart.id, deal.id)">
-          Remove from shopping cart.
-        </q-btn>
-      </q-card-actions>
+      <q-card-section>
+        {{ deal.terms_and_conditions }}
+      </q-card-section>
     </q-card>
   </q-page>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useDealStore } from '../../../stores/deal-store'
 import { useAuthStore } from '../../../stores/auth-store'
 
-const stars = ref(4)
+// const stars = ref(0)
 
 const $q = useQuasar()
 
@@ -74,46 +116,42 @@ const authStore = useAuthStore()
 
 const route = useRoute()
 
+onMounted(async () => {
+  await dealStore.fetchDeals()
+})
+
+const geoDeal = computed(() => {
+  if (!route.params.id || !dealStore.geoDeals) {
+    return null
+  }
+
+  const dealId = JSON.parse(route.params.id)
+  return dealStore.geoDeals.find((d) => d.id === dealId) || null
+})
+
 const store = computed(() => {
-  if (!route.params.id || !dealStore.stores) {
-    return null
-  }
-
-  const dealId = JSON.parse(route.params.id)
-  const deals = dealStore.deals
-  const deal = deals.find((deal) => deal.id === dealId)
-  const stores = dealStore.stores
-  const store = stores.find((store) => store.id === deal.store)
-
-  return store || null
+  return geoDeal.value && geoDeal.value.store_name
+    ? {
+        name: geoDeal.value.store_name,
+        address: geoDeal.value.store_address,
+        phone_number: geoDeal.value.store_phone_number,
+        website: geoDeal.value.store_website
+      }
+    : null
 })
 
-const deal = computed(() => {
-  if (!route.params.id || !dealStore.deals) {
-    return null
-  }
-
-  const dealId = JSON.parse(route.params.id)
-  const deals = dealStore.deals
-  const deal = deals.find((deal) => deal.id === dealId)
-
-  return deal || null
-})
+const deal = geoDeal // alias to match your existing template bindings
 
 const cart = computed(() => {
   if (!route.params.id || !dealStore.shopping_list) {
     return null
   }
   const userId = authStore.userId
-  const shoppingList = dealStore.shopping_list
-  const shoppingCart = shoppingList.find((cart) => cart.user === userId)
-
-  return shoppingCart || null
+  return dealStore.shopping_list.find((cart) => cart.user === userId) || null
 })
 
 const isInCart = computed(() => {
-  // Return false if cart or deal is null, preventing null property access
-  return cart.value && deal.value && cart.value.deals.some((item) => item === deal.value.id)
+  return cart.value && deal.value && cart.value.deals.includes(deal.value.id)
 })
 
 async function createAddToCart (dealId) {
@@ -125,16 +163,12 @@ async function createAddToCart (dealId) {
       message: 'Added to cart',
       position: 'top'
     })
-
-    // router.push({ name: 'predictions' }) // Make sure to import 'router' if you're using Vue Router
   } catch (err) {
-    if (err.response.data.detail) {
-      $q.notify({
-        type: 'negative',
-        message: err.response.data.detail,
-        position: 'top'
-      })
-    }
+    $q.notify({
+      type: 'negative',
+      message: err.response?.data?.detail || 'Error adding to cart',
+      position: 'top'
+    })
   }
 }
 
@@ -147,16 +181,12 @@ async function addToCart (shoppingCartId, dealId) {
       message: 'Added to cart',
       position: 'top'
     })
-
-    // router.push({ name: 'predictions' }) // Make sure to import 'router' if you're using Vue Router
   } catch (err) {
-    if (err.response.data.detail) {
-      $q.notify({
-        type: 'negative',
-        message: err.response.data.detail,
-        position: 'top'
-      })
-    }
+    $q.notify({
+      type: 'negative',
+      message: err.response?.data?.detail || 'Error adding to cart',
+      position: 'top'
+    })
   }
 }
 
@@ -169,21 +199,42 @@ async function removeFromCart (shoppingCartId, dealId) {
       message: 'Removed from cart',
       position: 'top'
     })
-
-    // router.push({ name: 'predictions' }) // Make sure to import 'router' if you're using Vue Router
   } catch (err) {
-    if (err.response.data.detail) {
-      $q.notify({
-        type: 'negative',
-        message: err.response.data.detail,
-        position: 'top'
-      })
-    }
+    $q.notify({
+      type: 'negative',
+      message: err.response?.data?.detail || 'Error removing from cart',
+      position: 'top'
+    })
   }
 }
 
-// Fetch deals on component mount
-onMounted(async () => {
-  await dealStore.fetchDeals()
-})
+function openDirections () {
+  // Check if store location data exists
+  if (!deal.value.storeLocation.coordinates) {
+    $q.notify({
+      type: 'warning',
+      message: 'Store location not available',
+      position: 'top'
+    })
+    return
+  }
+
+  // Extract store coordinates from the nested structure
+  const [storeLng, storeLat] = deal.value.storeLocation.coordinates
+
+  // Open Google Maps with just the destination
+  // Let Google Maps handle getting the user's current location
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${storeLat},${storeLng}&travelmode=driving`
+  window.open(url, '_blank')
+}
+
+function callStore () {
+  if (!deal.value?.store_phone_number) {
+    $q.notify({ type: 'warning', message: 'No phone number available', position: 'top' })
+    return
+  }
+  const telUrl = `tel:${deal.value.store_phone_number}`
+  window.location.href = telUrl
+}
+
 </script>

@@ -1,98 +1,149 @@
 <template>
-  <q-page padding>
+  <q-page class="q-pa-md bg-grey-2">
+
+    <!-- Banner -->
     <q-banner dense inline-actions class="text-white bg-primary q-mb-md">
-      <div class="text-h5">Requests</div>
+      <div class="text-h6">Buddy Requests</div>
       <template v-slot:action>
-        <q-btn dense round flat icon="swap_horiz">
-          <q-badge color="negative" floating transparent>
-            2
+        <q-btn dense round flat icon="swap_horiz" color="white">
+          <q-badge color="red" floating rounded>
+            {{ sharedInterestDeals.length }}
           </q-badge>
         </q-btn>
       </template>
     </q-banner>
 
-    <q-list bordered separator class="q-mt-sm">
-      <q-item class="q-my-sm" v-for="dealData in sharedInterestDeals" :key="dealData.deal.id">
-        <q-item-section>
-        <q-card class="my-card" flat>
-          <q-card-section horizontal>
-            <q-card-section>
-              <img :src="dealData.deal.image_url" alt="pic" style="height: 100px; width: auto;" />
-            </q-card-section>
+    <!-- Empty State -->
+    <div v-if="sharedInterestDeals.length === 0" class="column items-center q-mt-xl">
+      <q-icon name="swap_horiz" size="xl" color="grey-5" />
+      <div class="text-h6 text-grey-5 q-mt-md">No buddy requests yet</div>
+      <div class="text-caption text-grey q-mt-sm">
+        When you and others save the same deals, requests will appear here
+      </div>
+    </div>
 
-            <q-card-section>
-              <div class="text-h6 q-mt-sm q-mb-xs text-dark">{{ dealData.deal.title }}</div>
-              <div class="text-caption text-blue-grey-10">
-                {{ dealData.deal.description }}
-              </div>
-            </q-card-section>
+    <!-- Shared Deals List -->
+    <div v-else>
+      <q-card
+        v-for="dealData in sharedInterestDeals"
+        :key="dealData.deal.id"
+        class="q-mb-md q-px-md q-pt-sm shadow-2"
+        style="border-radius: 12px;"
+      >
+        <!-- Deal Card -->
+        <q-card-section horizontal class="items-start">
+          <q-img
+            :src="dealData.deal.image_url"
+            style="width: 100px; height: 100px;"
+            class="rounded-borders"
+          />
+
+          <q-card-section class="q-pt-xs">
+            <div class="text-subtitle1 text-weight-bold">{{ dealData.deal.title }}</div>
+            <div class="text-caption text-grey-7 text-ellipsis-2-lines">
+              {{ dealData.deal.description }}
+            </div>
           </q-card-section>
-        </q-card>
+        </q-card-section>
 
-        <q-item-label v-for="user in dealData.users" :key="user.id">
-          <div class="row justify-between q-mb-sm">
-            <div class="text-h6 text-secondary">@{{ user.username }}</div>
+        <!-- User Requests -->
+        <q-card-section
+          v-for="user in dealData.users"
+          :key="user.id"
+          class="q-pt-none user-request-section"
+        >
+          <q-separator class="q-mb-sm" />
+          <div class="row items-center justify-between">
+            <div class="row items-center">
+              <q-avatar size="32px" color="teal" text-color="white" class="q-mr-sm">
+                {{ user.username.charAt(0).toUpperCase() }}
+              </q-avatar>
+              <div class="text-subtitle2 text-teal-10">@{{ user.username }}</div>
+            </div>
 
             <div>
-
+              <!-- No Request State -->
               <q-btn
                 v-if="buttonState(dealData.deal.id, user.id) === 'noRequest'"
-                push color="white" text-color="primary"
+                unelevated
+                color="primary"
                 label="Request"
+                dense
                 @click="request(dealData.deal.id, user.id)"
               />
 
-              <q-btn
+              <!-- Pending Requester State -->
+              <q-chip
                 v-if="buttonState(dealData.deal.id, user.id) === 'pendingRequester'"
-                push color="warning" text-color="white"
-                label="Pending..."
-              />
+                color="amber"
+                text-color="dark"
+                icon="hourglass_top"
+                dense
+              >
+                Pending
+              </q-chip>
 
+              <!-- Pending Recipient State -->
               <q-btn-dropdown
                 v-if="buttonState(dealData.deal.id, user.id) === 'pendingRecipient'"
-                color="primary" label="Requested">
-                <q-list>
+                color="primary"
+                label="Respond"
+                dense
+                dropdown-icon="expand_more"
+              >
+                <q-list dense>
                   <q-item clickable v-close-popup @click="acceptRequest(dealData.deal.id, user.id)">
-                    <q-item-section>
-                      <q-item-label>Accept</q-item-label>
+                    <q-item-section avatar>
+                      <q-icon name="check" color="positive" />
                     </q-item-section>
+                    <q-item-section>Accept</q-item-section>
                   </q-item>
                   <q-item clickable v-close-popup @click="declineRequest(dealData.deal.id, user.id)">
-                    <q-item-section>
-                      <q-item-label>Decline</q-item-label>
+                    <q-item-section avatar>
+                      <q-icon name="close" color="negative" />
                     </q-item-section>
+                    <q-item-section>Decline</q-item-section>
                   </q-item>
                 </q-list>
               </q-btn-dropdown>
 
-              <q-btn
+              <!-- Accepted State -->
+              <q-chip
                 v-if="buttonState(dealData.deal.id, user.id) === 'accepted'"
-                push color="positive" text-color="white"
-                label="Accepted"
-              />
+                color="green-1"
+                text-color="green-10"
+                icon="check_circle"
+                dense
+              >
+                Accepted
+              </q-chip>
 
-              <q-btn
+              <!-- Declined State -->
+              <q-chip
                 v-if="buttonState(dealData.deal.id, user.id) === 'declined'"
-                push color="negative" text-color="white"
-                label="Declined"
-              />
-
+                color="red-1"
+                text-color="red-10"
+                icon="cancel"
+                dense
+              >
+                Declined
+              </q-chip>
             </div>
           </div>
-        </q-item-label>
-        <q-separator />
-        <q-item-label align="center">
-          <q-btn :to="{ name: 'deal', params: { id: dealData.deal.id } }" icon="visibility" flat color="primary" >
-            View Deal
-          </q-btn>
-        </q-item-label>
-        <q-separator />
-        </q-item-section>
+        </q-card-section>
 
-      </q-item>
-
-    </q-list>
-
+        <!-- View Deal Button -->
+        <q-card-actions class="justify-center bg-grey-1">
+          <q-btn
+            :to="{ name: 'deal', params: { id: dealData.deal.id } }"
+            icon="visibility"
+            label="View Deal"
+            color="primary"
+            flat
+          />
+        </q-card-actions>
+      </q-card>
+    </div>
   </q-page>
 </template>
 
@@ -239,3 +290,68 @@ async function declineRequest (dealId, userId) {
 }
 
 </script>
+
+<style scoped>
+.text-ellipsis-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .text-subtitle1 {
+    font-size: 1rem;
+  }
+
+  .text-subtitle2 {
+    font-size: 0.875rem;
+  }
+
+  .q-btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+
+/* Animation for buttons */
+.q-btn {
+  transition: all 0.2s ease;
+}
+
+.q-btn:active {
+  transform: scale(0.96);
+}
+
+/* Card styling */
+.q-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* User request section */
+.user-request-section {
+  background-color: #fafafa;
+  margin: 0 -16px;
+  padding: 8px 16px;
+}
+
+/* Avatar styling */
+.q-avatar {
+  font-weight: 500;
+}
+
+/* Chip styling */
+.q-chip {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+/* View deal button section */
+.q-card-actions {
+  border-top: 1px solid #e0e0e0;
+  padding: 12px;
+}
+</style>

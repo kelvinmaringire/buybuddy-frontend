@@ -1,57 +1,35 @@
 <template>
   <q-page padding>
     <q-banner dense inline-actions class="text-white bg-primary q-mb-xs">
-      <div class="text-h5">Deals</div>
+      <div class="text-h6">Deals</div>
       <template v-slot:action>
         <q-btn flat color="white" icon="search" />
-        <q-btn dense round flat icon="local_offer">
-          <q-badge color="negative" floating transparent>
-            {{ dealsLength }}
-          </q-badge>
-        </q-btn>
       </template>
     </q-banner>
-    <!--div v-show="searchAddress">
-      <form>
-        <input
-          id="place"
-          type="text"
-          v-model="placeInput"
-          ref="autocompleteInput"
-          placeholder="Enter New Area"
-        />
-        <q-btn class="glossy" color="primary" label="Close" push no-caps @click="searchAddress = false" />
-      </form>
-    </div-->
-    <!--div v-show="!searchAddress" class="q-mb-md">
-      <form >
-        <q-btn class="glossy" color="primary" label="Change current location" push @click="searchAddress = true" />
-      </form>
-      <div v-if="selectedPlace" class="q-mt-xs">
-        <p><strong>Name:</strong> {{ selectedPlace.name }}</p>
-        <p><strong>Address:</strong> {{ selectedPlace.formatted_address }}</p>
-        <p><strong>Latitude:</strong> {{ (selectedPlace.geometry.viewport.ii.lo + selectedPlace.geometry.viewport.ii.hi) / 2 }}</p>
-        <p><strong>Longitude:</strong> {{ (selectedPlace.geometry.viewport.Gh.lo + selectedPlace.geometry.viewport.Gh.hi) / 2 }}</p>
-      </div>
-    </div-->
 
-    <q-list bordered separator dense>
-      <q-item clickable v-ripple v-for="deal in dealStore.deals" :key="deal.id" :to="{ name: 'front_deal', params: { id: deal.id } }">
-        <q-card class="my-card" flat>
-          <q-card-section horizontal>
-            <q-card-section>
-              <img :src="deal.image_url" alt="pic" style="height: 100px; width: auto;" />
-            </q-card-section>
-
-            <q-card-section>
-              <div class="text-h6 q-mt-sm q-mb-xs text-dark">{{ deal.title }}</div>
-              <div class="text-caption text-blue-grey-10">
+    <q-list bordered separator dense class="rounded-borders">
+      <q-item
+        v-for="deal in dealStore.deals"
+        :key="deal.id"
+        clickable
+        v-ripple
+        :to="{ name: 'front_deal', params: { id: deal.id } }"
+      >
+        <q-card flat class="q-pa-xs full-width">
+          <q-card-section horizontal class="q-gutter-sm items-start no-wrap">
+            <q-img
+              :src="deal.image_url"
+              alt="Deal Image"
+              style="width: 100px; height: 100px;"
+              class="rounded-borders"
+              spinner-color="grey-5"
+            />
+            <div class="col">
+              <div class="text-subtitle1 text-dark">{{ deal.title }}</div>
+              <div class="text-caption text-grey-8 ellipsis-2-lines">
                 {{ deal.description }}
               </div>
-              <div class="text-caption text-grey">
-                Hermanus | 1.53km
-              </div>
-            </q-card-section>
+            </div>
           </q-card-section>
         </q-card>
       </q-item>
@@ -60,12 +38,10 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useDealStore } from '../stores/deal-store'
 
 const dealStore = useDealStore()
-
-const dealsLength = computed(() => dealStore.deals.length)
 
 // Places API AIzaSyD7NL9oNrApHfBlz1YL52_QoHcJYDvpHGQ
 
@@ -107,35 +83,20 @@ onMounted(() => {
 
 <style scoped>
 
+.ellipsis-2-lines {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.q-list--dense > .q-item,
+.q-item--dense {
+  padding: 0;
+}
+
 .q-card__section--vert {
-    padding: 5px;
-}
-
-.q-list--dense > .q-item, .q-item--dense {
-    padding: 0px;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-input#place {
-  width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-input#place:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  padding: 5px;
 }
 
 </style>

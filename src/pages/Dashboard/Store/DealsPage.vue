@@ -1,51 +1,81 @@
 <template>
   <q-page padding>
-    <q-banner dense inline-actions class="text-white bg-primary q-mb-xs">
-      <div class="text-h5">Deals</div>
+    <!-- Banner Header -->
+    <q-banner dense inline-actions class="text-white bg-primary q-mb-md q-pa-sm rounded-borders">
+      <div class="text-h6">Nearby Deals</div>
       <template v-slot:action>
-        <q-btn flat color="white" icon="search" />
-        <q-btn dense round flat icon="local_offer">
-          <q-badge color="negative" floating transparent>
-            {{ dealsLength }}
-          </q-badge>
-        </q-btn>
+        <q-btn dense flat round color="white" icon="search" />
       </template>
     </q-banner>
-    <div v-show="searchAddress">
-      <form>
-        <input
-          id="place"
-          type="text"
-          v-model="placeInput"
-          ref="autocompleteInput"
-          placeholder="Enter New Area"
+
+    <!-- Search Address Form -->
+    <q-slide-transition>
+      <div v-show="searchAddress" class="q-mb-md">
+        <form class="search-form">
+          <input
+            id="place"
+            type="text"
+            v-model="placeInput"
+            ref="autocompleteInput"
+            placeholder="Enter New Area"
+            class="styled-input"
+          />
+          <q-btn
+            class="glossy"
+            color="primary"
+            label="Close"
+            push
+            no-caps
+            icon="close"
+            @click="searchAddress = false"
+          />
+        </form>
+      </div>
+    </q-slide-transition>
+
+    <!-- Toggle Address Form Button -->
+    <q-slide-transition>
+      <div v-show="!searchAddress" class="q-mb-md">
+        <q-btn
+          color="primary"
+          label="Change current location"
+          icon="place"
+          no-caps
+          push
+          glossy
+          @click="searchAddress = true"
+          class="full-width"
         />
-        <q-btn class="glossy" color="primary" label="Close" push no-caps @click="searchAddress = false" />
-      </form>
-    </div>
-    <div v-show="!searchAddress" class="q-mb-md">
-      <form >
-        <q-btn class="glossy" color="primary" label="Change current location" push @click="searchAddress = true" />
-      </form>
-    </div>
+      </div>
+    </q-slide-transition>
 
-    <q-list bordered separator dense>
-      <q-item clickable v-ripple v-for="deal in displayedDeals" :key="deal.id" :to="{ name: 'deal', params: { id: deal.id } }">
-        <q-card class="my-card" flat>
-          <q-card-section horizontal>
-            <q-card-section>
-              <img :src="deal.image_url" alt="pic" style="height: 100px; width: auto;" />
-            </q-card-section>
-
-            <q-card-section>
-              <div class="text-h6 q-mt-sm q-mb-xs text-dark">{{ deal.title }}</div>
-              <div class="text-caption text-blue-grey-10">
+    <!-- Deal Cards -->
+    <q-list bordered separator dense class="rounded-borders">
+      <q-item
+        v-for="deal in displayedDeals"
+        :key="deal.id"
+        clickable
+        v-ripple
+        :to="{ name: 'deal', params: { id: deal.id } }"
+      >
+        <q-card flat class="q-pa-xs full-width">
+          <q-card-section horizontal class="q-gutter-sm items-start no-wrap">
+            <q-img
+              :src="deal.image_url"
+              alt="Deal Image"
+              style="width: 100px; height: 100px;"
+              class="rounded-borders"
+              spinner-color="grey-5"
+            />
+            <div class="col">
+              <div class="text-subtitle1 text-dark">{{ deal.title }}</div>
+              <div class="text-caption text-grey-8 ellipsis-2-lines">
                 {{ deal.description }}
               </div>
-              <div class="text-caption text-grey">
-                {{deal.store_address}} | {{ deal.distanceKm }}km
+              <div class="text-caption text-blue-grey-6 q-mt-xs">
+                {{ deal.store_address }} | {{ deal.distanceKm }} km
               </div>
-            </q-card-section>
+            </div>
           </q-card-section>
         </q-card>
       </q-item>
@@ -60,8 +90,6 @@ import { useAuthStore } from '../../../stores/auth-store'
 
 const dealStore = useDealStore()
 const authStore = useAuthStore()
-
-const dealsLength = computed(() => dealStore.geoDeals.length)
 
 // Places API AIzaSyD7NL9oNrApHfBlz1YL52_QoHcJYDvpHGQ
 
@@ -148,35 +176,45 @@ const displayedDeals = computed(() => locationDependentDeals.value.deals)
 
 <style scoped>
 
-.q-card__section--vert {
-    padding: 5px;
-}
-
-.q-list--dense > .q-item, .q-item--dense {
-    padding: 0px;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-input#place {
+#place,
+.styled-input {
   width: 100%;
-  padding: 0.75rem;
+  padding: 12px;
   font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 8px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
   outline: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-input#place:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+#place:focus,
+.styled-input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 6px rgba(25, 118, 210, 0.5);
+}
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.ellipsis-2-lines {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.q-list--dense > .q-item,
+.q-item--dense {
+  padding: 0;
+}
+
+.q-card__section--vert {
+  padding: 5px;
 }
 
 </style>

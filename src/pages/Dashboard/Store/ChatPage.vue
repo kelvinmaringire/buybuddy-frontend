@@ -2,7 +2,7 @@
   <q-page class="chat-page">
     <!-- Chat Header -->
     <q-banner dense inline-actions class="text-white bg-positive q-mb-md chat-header">
-      <div class="text-h5">Chat</div>
+      <div class="text-h6">Chat</div>
       <template v-slot:action>
         <q-btn dense round flat icon="close" :to="{ name: 'buddy'}"></q-btn>
       </template>

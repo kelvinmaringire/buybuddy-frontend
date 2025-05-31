@@ -1,61 +1,97 @@
 <template>
-  <q-page padding>
+  <q-page class="q-pa-md bg-grey-2">
+    <!-- Banner -->
     <q-banner dense inline-actions class="text-white bg-primary q-mb-md">
-      <div class="text-h5">Buy Buddies</div>
+      <div class="text-h6">Buy Buddies</div>
       <template v-slot:action>
-        <q-btn dense round flat icon="people">
-          <q-badge color="negative" floating transparent>
-            2
+        <q-btn dense round flat icon="people" color="white">
+          <q-badge color="red" floating rounded>
+            {{ sharedAcceptedDeals.length }}
           </q-badge>
         </q-btn>
       </template>
     </q-banner>
-    <q-list bordered separator class="q-mt-sm">
-      <q-item class="q-my-sm" v-for="dealData in sharedAcceptedDeals" :key="dealData.deal.id" v-ripple>
-        <q-item-section>
-          <q-card class="my-card" flat>
-          <q-card-section horizontal>
-            <q-card-section>
-              <img :src="dealData.deal.image_url" alt="pic" style="height: 100px; width: auto;" />
-            </q-card-section>
 
-            <q-card-section>
-              <div class="text-h6 q-mt-sm q-mb-xs text-dark">{{ dealData.deal.title }}</div>
-              <div class="text-caption text-blue-grey-10">
-                {{ dealData.deal.description }}
-              </div>
-            </q-card-section>
-          </q-card-section>
-        </q-card>
+    <!-- Empty State -->
+    <div v-if="sharedAcceptedDeals.length === 0" class="column items-center q-mt-xl">
+      <q-icon name="people" size="xl" color="grey-5" />
+      <div class="text-h6 text-grey-5 q-mt-md">No buy buddies yet</div>
+      <div class="text-caption text-grey q-mt-sm">
+        When you accept buddy requests, they will appear here
+      </div>
+    </div>
 
-          <q-item-label v-for="user in dealData.users" :key="user.id">
-            <div class="row justify-between q-mb-sm">
-              <div class="text-h6 text-secondary">@{{ user.username }}</div>
-              <div>
-                <q-btn
-                  v-if="buttonState(dealData.deal.id, user.id) === 'accepted'"
-                  push icon="chat" color="positive" text-color="white"
-                  label="Chat" :to="{ name: 'chat', params: { id: getBuddyId(dealData.deal.id, user.id) } }"
-                />
-              </div>
+    <!-- Shared Deals List -->
+    <div v-else>
+      <q-card
+        v-for="dealData in sharedAcceptedDeals"
+        :key="dealData.deal.id"
+        class="q-mb-md q-px-md q-pt-sm shadow-2"
+        style="border-radius: 12px;"
+      >
+        <!-- Deal Card -->
+        <q-card-section horizontal class="items-start">
+          <q-img
+            :src="dealData.deal.image_url"
+            style="width: 100px; height: 100px;"
+            class="rounded-borders"
+          />
+
+          <q-card-section class="q-pt-xs">
+            <div class="text-subtitle1 text-weight-bold">{{ dealData.deal.title }}</div>
+            <div class="text-caption text-grey-7 text-ellipsis-2-lines">
+              {{ dealData.deal.description }}
             </div>
-          </q-item-label>
-          <q-separator />
-          <q-item-label align="center">
-            <q-btn :to="{ name: 'deal', params: { id: dealData.deal.id } }" icon="visibility" flat color="primary">
-              View Deal
-            </q-btn>
-          </q-item-label>
-          <q-separator />
-        </q-item-section>
-      </q-item>
-    </q-list>
+          </q-card-section>
+        </q-card-section>
+
+        <!-- User Buddies -->
+        <q-card-section
+          v-for="user in dealData.users"
+          :key="user.id"
+          class="q-pt-none user-request-section"
+        >
+          <q-separator class="q-mb-sm" />
+          <div class="row items-center justify-between">
+            <div class="row items-center">
+              <q-avatar size="32px" color="teal" text-color="white" class="q-mr-sm">
+                {{ user.username.charAt(0).toUpperCase() }}
+              </q-avatar>
+              <div class="text-subtitle2 text-teal-10">@{{ user.username }}</div>
+            </div>
+
+            <div>
+              <!-- Accepted State -->
+              <q-btn
+                v-if="buttonState(dealData.deal.id, user.id) === 'accepted'"
+                push
+                icon="chat"
+                color="positive"
+                text-color="white"
+                label="Chat"
+                :to="{ name: 'chat', params: { id: getBuddyId(dealData.deal.id, user.id) } }"
+              />
+            </div>
+          </div>
+        </q-card-section>
+
+        <!-- View Deal Button -->
+        <q-card-actions class="justify-center bg-grey-1">
+          <q-btn
+            :to="{ name: 'deal', params: { id: dealData.deal.id } }"
+            icon="visibility"
+            label="View Deal"
+            color="primary"
+            flat
+          />
+        </q-card-actions>
+      </q-card>
+    </div>
   </q-page>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-// import { useQuasar } from 'quasar'
 import { useBuddyStore } from '../../../stores/buddy-store'
 import { useDealStore } from '../../../stores/deal-store'
 import { useAuthStore } from '../../../stores/auth-store'
@@ -118,15 +154,15 @@ function currentRequest (dealId, recipientId) {
         (request.requester === recipientId && request.recipient === requesterId))
   )
 }
+
 function getBuddyId (dealId, userId) {
-  const buddies = buddyStore.buddies // Assuming this is your list of buddies
-  const request = currentRequest(dealId, userId) // Get the request for the given deal and user
+  const buddies = buddyStore.buddies
+  const request = currentRequest(dealId, userId)
 
   if (!request) {
-    return null // No request found
+    return null
   }
 
-  // Find the buddy relationship that matches the request's requester and recipient
   const buddy = buddies.find(
     b =>
       b.deal === dealId &&
@@ -134,7 +170,59 @@ function getBuddyId (dealId, userId) {
         (b.requester === request.recipient && b.recipient === request.requester))
   )
 
-  // Return the buddyId if a matching relationship is found
   return buddy ? buddy.id : null
 }
 </script>
+
+<style scoped>
+.text-ellipsis-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .text-subtitle1 {
+    font-size: 1rem;
+  }
+
+  .text-subtitle2 {
+    font-size: 0.875rem;
+  }
+
+  .q-btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+
+/* Animation for buttons */
+.q-btn {
+  transition: all 0.2s ease;
+}
+
+.q-btn:active {
+  transform: scale(0.96);
+}
+
+/* Card styling */
+.q-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* User request section */
+.user-request-section {
+  background-color: #fafafa;
+  margin: 0 -16px;
+  padding: 8px 16px;
+}
+
+/* Avatar styling */
+.q-avatar {
+  font-weight: 500;
+}
+</style>
