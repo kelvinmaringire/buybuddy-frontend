@@ -1,0 +1,17 @@
+{
+  "apps":
+    [
+        {
+            "appId": "android-app-id",
+            "dependencyInstallCommand": "pnpm i",
+            "webBuildCommand": "pnpm quasar build -m capacitor -T android -d",
+            "androidPath": "src-capacitor/android"
+        },
+        {
+            "appId": "ios-app-id",
+            "dependencyInstallCommand": "pnpm i",
+            "webBuildCommand": "pnpm quasar build -m capacitor -T ios",
+            "iosPath": "src-capacitor/ios"
+        }
+    ]
+}
