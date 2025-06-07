@@ -41,7 +41,7 @@
            </q-input>
            <q-input label="Confirm Password" :type="isPwd ? 'password' : 'text'" v-model="credentials.confirm_password">
            </q-input>
-           <div>
+           <div class="q-ml-md">
              <q-btn class="full-width" color="primary" label="register" type="submit" rounded>
              </q-btn>
              <div class="text-center q-mt-sm q-gutter-lg">

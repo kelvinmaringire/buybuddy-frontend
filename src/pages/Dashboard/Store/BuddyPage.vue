@@ -62,15 +62,21 @@
 
             <div>
               <!-- Accepted State -->
-              <q-btn
-                v-if="buttonState(dealData.deal.id, user.id) === 'accepted'"
-                push
-                icon="chat"
-                color="positive"
-                text-color="white"
-                label="Chat"
-                :to="{ name: 'chat', params: { id: getBuddyId(dealData.deal.id, user.id) } }"
-              />
+<q-btn
+  v-if="buttonState(dealData.deal.id, user.id) === 'accepted'"
+  push
+  icon="chat"
+  color="positive"
+  text-color="white"
+  class="q-pr-md q-btn-with-badge"
+  :to="{ name: 'chat', params: { id: getBuddyId(dealData.deal.id, user.id) } }"
+>
+  <div class="row items-center no-wrap">
+    <span class="q-ml-sm">Chat</span>
+  </div>
+  <q-badge color="negative" floating class="badge-offset">22</q-badge>
+</q-btn>
+
             </div>
           </div>
         </q-card-section>
@@ -104,6 +110,8 @@ const authStore = useAuthStore()
 const sharedAcceptedDeals = computed(() => {
   const userId = authStore.userId
   const allDeals = dealStore.deals
+  const messages = buddyStore.messages
+  console.log(messages)
   const shoppingList = dealStore.shopping_list
 
   const userCart = shoppingList.find(cart => cart.user === userId)
@@ -224,5 +232,16 @@ function getBuddyId (dealId, userId) {
 /* Avatar styling */
 .q-avatar {
   font-weight: 500;
+}
+
+.q-btn-with-badge {
+  position: relative;
+  padding-right: 2.5em; /* Adjust this to make space for the badge */
+}
+
+.badge-offset {
+  position: absolute;
+  top: 2px;
+  right: 2px;
 }
 </style>

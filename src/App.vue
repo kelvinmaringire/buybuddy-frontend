@@ -3,6 +3,8 @@
 </template>
 
 <script setup>
+// import { useRouter } from 'vue-router'
+import { onMounted } from 'vue'
 
 import { useAuthStore } from './stores/auth-store'
 import { useDealStore } from './stores/deal-store'
@@ -14,6 +16,10 @@ const buddyStore = useBuddyStore()
 
 defineOptions({
   name: 'App'
+})
+
+onMounted(() => {
+  alert(window.location.href)
 })
 
 // Ensure store initialization

@@ -105,6 +105,13 @@ export const useAuthStore = defineStore('auth', {
         window.localStorage.removeItem('token')
         this.isAuthenticated = false
       }
+    },
+    async changePassword (payload) {
+      console.log('Payload:', payload)
+      const response = await api.post('accounts/change-password/', payload)
+
+      return response.data
     }
+
   }
 })

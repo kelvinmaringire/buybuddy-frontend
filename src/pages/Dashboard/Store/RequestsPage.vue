@@ -62,15 +62,6 @@
             </div>
 
             <div>
-              <!-- No Request State -->
-              <q-btn
-                v-if="buttonState(dealData.deal.id, user.id) === 'noRequest'"
-                unelevated
-                color="primary"
-                label="Request"
-                dense
-                @click="request(dealData.deal.id, user.id)"
-              />
 
               <!-- Pending Requester State -->
               <q-chip
@@ -192,7 +183,13 @@ const sharedInterestDeals = computed(() => {
     const deal = allDeals.find(d => d.id === sharedDeal.deal)
 
     // Map user IDs to actual user objects from authStore.users
-    const users = sharedDeal.users.map(userId => authStore.users.find(u => u.id === userId))
+    // const users = sharedDeal.users.map(userId => authStore.users.find(u => u.id === userId))
+    const users = sharedDeal.users
+      .map(userId => authStore.users.find(u => u.id === userId))
+      .filter(user => {
+        const state = buttonState.value(deal.id, user.id)
+        return state !== 'noRequest'
+      })
 
     // Return the deal and its associated user objects
     return {
@@ -243,29 +240,6 @@ function currentRequest (dealId, recipientId) {
   )
 
   return currentRequest
-}
-
-async function request (dealId, recipientId) {
-  const requesterId = authStore.userId
-  const buddyRequest = { requester: requesterId, recipient: recipientId, deal: dealId, status: 'Request' }
-
-  try {
-    await buddyStore.buddyRequest(buddyRequest)
-
-    $q.notify({
-      type: 'primary',
-      message: 'Buddy Requested',
-      position: 'top'
-    })
-  } catch (err) {
-    if (err.response.data.detail) {
-      $q.notify({
-        type: 'negative',
-        message: err.response.data.detail,
-        position: 'top'
-      })
-    }
-  }
 }
 async function acceptRequest (dealId, userId) {
   try {

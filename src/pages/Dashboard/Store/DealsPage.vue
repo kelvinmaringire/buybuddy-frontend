@@ -4,9 +4,30 @@
     <q-banner dense inline-actions class="text-white bg-primary q-mb-md q-pa-sm rounded-borders">
       <div class="text-h6">Nearby Deals</div>
       <template v-slot:action>
-        <q-btn dense flat round color="white" icon="search" />
+        <q-btn
+          dense
+          flat
+          round
+          color="white"
+          icon="search"
+          @click="showSearchInput = !showSearchInput, searchAddress = false"
+        />
       </template>
     </q-banner>
+
+    <!-- Search Input Box -->
+    <q-slide-transition>
+      <div v-show="showSearchInput" class="q-mb-md">
+        <form class="search-form">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search deals by title, description, store, or address"
+            class="search-input"
+          />
+        </form>
+      </div>
+    </q-slide-transition>
 
     <!-- Search Address Form -->
     <q-slide-transition>
@@ -43,16 +64,37 @@
           no-caps
           push
           glossy
-          @click="searchAddress = true"
+          @click="searchAddress = true, showSearchInput = false"
           class="full-width"
         />
       </div>
     </q-slide-transition>
 
+    <!-- Category Filters -->
+    <div class="q-mb-md q-gutter-sm">
+      <q-btn-toggle
+        v-model="selectedCategory"
+        spread
+        no-caps
+        rounded
+        unelevated
+        toggle-color="primary"
+        color="white"
+        text-color="primary"
+        :options="[
+          {label: 'All', value: 'all'},
+          {label: 'Food', value: 'food', icon: 'restaurant'},
+          {label: 'Drinks', value: 'drinks', icon: 'local_bar'},
+          {label: 'Shopping', value: 'shopping', icon: 'shopping_bag'},
+          {label: 'Services', value: 'services', icon: 'miscellaneous_services'}
+        ]"
+      />
+    </div>
+
     <!-- Deal Cards -->
     <q-list bordered separator dense class="rounded-borders">
       <q-item
-        v-for="deal in displayedDeals"
+        v-for="deal in filteredDeals"
         :key="deal.id"
         clickable
         v-ripple
@@ -75,6 +117,15 @@
               <div class="text-caption text-blue-grey-6 q-mt-xs">
                 {{ deal.store_address }} | {{ deal.distanceKm }} km
               </div>
+              <q-chip
+                v-if="deal.category"
+                dense
+                :color="getCategoryColor(deal.category)"
+                text-color="white"
+                class="q-mt-xs"
+              >
+                {{ formatCategory(deal.category) }}
+              </q-chip>
             </div>
           </q-card-section>
         </q-card>
@@ -91,13 +142,47 @@ import { useAuthStore } from '../../../stores/auth-store'
 const dealStore = useDealStore()
 const authStore = useAuthStore()
 
-// Places API AIzaSyD7NL9oNrApHfBlz1YL52_QoHcJYDvpHGQ
-
 const placeInput = ref('')
 const selectedPlace = ref(null)
 const autocompleteInput = ref(null)
-
 const searchAddress = ref(false)
+const selectedCategory = ref('all')
+const showSearchInput = ref(false)
+const searchQuery = ref('')
+
+// Format category for display
+const formatCategory = (category) => {
+  return category.charAt(0).toUpperCase() + category.slice(1)
+}
+
+// Get color based on category
+const getCategoryColor = (category) => {
+  const colors = {
+    food: 'orange',
+    drinks: 'blue',
+    shopping: 'purple',
+    services: 'teal'
+  }
+  return colors[category] || 'grey'
+}
+
+// Filter deals based on selected category and search query
+const filteredDeals = computed(() => {
+  let deals = locationDependentDeals.value.deals
+  if (selectedCategory.value !== 'all') {
+    deals = deals.filter(deal => deal.category === selectedCategory.value)
+  }
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.trim().toLowerCase()
+    deals = deals.filter(deal =>
+      deal.title?.toLowerCase().includes(query) ||
+      deal.description?.toLowerCase().includes(query) ||
+      deal.store_address?.toLowerCase().includes(query) ||
+      deal.store_name?.toLowerCase().includes(query)
+    )
+  }
+  return deals
+})
 
 onMounted(async () => {
   // eslint-disable-next-line no-undef
@@ -139,7 +224,6 @@ onMounted(async () => {
         try {
           await authStore.editPartialUser(user)
           searchAddress.value = false
-          // Force update deals calculation
           dealStore.updateDealsForNewLocation()
         } catch (error) {
           console.error('Failed to update user:', error)
@@ -151,7 +235,6 @@ onMounted(async () => {
   })
 })
 
-// Add this computed property to force updates when location changes
 const locationDependentDeals = computed(() => {
   return {
     deals: dealStore.geoDeals,
@@ -159,7 +242,6 @@ const locationDependentDeals = computed(() => {
   }
 })
 
-// Watch for changes in the user's location
 watch(
   () => authStore.profile?.location,
   (newLocation) => {
@@ -169,15 +251,12 @@ watch(
   },
   { deep: true }
 )
-
-// Update your template to use locationDependentDeals instead of dealStore.geoDeals directly
-const displayedDeals = computed(() => locationDependentDeals.value.deals)
 </script>
 
 <style scoped>
-
 #place,
-.styled-input {
+.styled-input,
+.search-input {
   width: 100%;
   padding: 12px;
   font-size: 1rem;
@@ -189,9 +268,14 @@ const displayedDeals = computed(() => locationDependentDeals.value.deals)
 }
 
 #place:focus,
-.styled-input:focus {
+.styled-input:focus,
+.search-input:focus {
   border-color: #1976d2;
   box-shadow: 0 0 6px rgba(25, 118, 210, 0.5);
+}
+
+.search-input {
+  background: transparent;
 }
 
 .search-form {
@@ -217,4 +301,18 @@ const displayedDeals = computed(() => locationDependentDeals.value.deals)
   padding: 5px;
 }
 
+/* Category chip styling */
+.q-chip {
+  font-size: 0.7rem;
+  height: 20px;
+}
+
+/* Button group styling */
+.q-btn-toggle {
+  border: 1px solid #e0e0e0;
+}
+
+.q-btn-toggle .q-btn {
+  margin: 0;
+}
 </style>

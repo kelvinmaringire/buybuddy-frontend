@@ -2,17 +2,25 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: false },
     children: [
       { path: '', name: 'deals', component: () => import('pages/FrontDealsPage.vue') },
       { path: ':id', name: 'front_deal', component: () => import('pages/FrontDealDetailPage.vue') },
       { path: 'login', name: 'login', component: () => import('pages/LoginPage.vue') },
       { path: 'register', name: 'register', component: () => import('pages/RegisterPage.vue') },
-      { path: 'password_reset', name: 'password_reset', component: () => import('pages/ForgotPasswordPage.vue') }
+      { path: 'password_reset', name: 'password_reset', component: () => import('pages/ForgotPasswordPage.vue') },
+      {
+        path: 'password-reset-confirm/:uidb64/:token',
+        name: 'password-reset-confirm',
+        component: () => import('pages/PasswordResetConfirmationPage.vue')
+      }
+
     ]
   },
   {
     path: '/dashboard',
     component: () => import('layouts/DashboardLayout.vue'),
+    meta: { requiresAuth: true },
     children: [
       { path: '', name: 'dashboard', component: () => import('src/pages/Dashboard/Store/DealsPage.vue') },
       { path: ':id', name: 'deal', component: () => import('src/pages/Dashboard/Store/DealDetailPage.vue') },

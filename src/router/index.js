@@ -30,14 +30,22 @@ export default route(function (/* { store, ssrContext } */) {
 
   Router.beforeEach((to, from, next) => {
     const authStore = useAuthStore()
-
     const { isAuthenticated } = authStore
 
-    if (to.matched.some((record) => record.meta.requiresAuth) && !isAuthenticated) {
-      next({ name: 'deals' })
-    } else {
-      next()
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+
+    // Prevent unauthenticated access to protected pages
+    if (requiresAuth && !isAuthenticated) {
+      return next({ name: 'deals' }) // public landing page
     }
+
+    // Prevent authenticated users from accessing login/register
+    if (!requiresAuth && isAuthenticated) {
+      return next({ name: 'dashboard' })
+    }
+
+    // All other cases: proceed as normal
+    return next()
   })
 
   return Router

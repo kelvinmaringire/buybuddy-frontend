@@ -44,7 +44,7 @@ const router = useRouter()
 
 function logout () {
   authStore.logout()
-  router.push({ name: 'login' })
+  router.push({ name: 'deals' })
 }
 
 </script>

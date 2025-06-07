@@ -16,6 +16,7 @@
               <q-input
                 filled
                 v-model="formData.currentPassword"
+                ref="currentPasswordRef"
                 label="Current Password *"
                 :type="showCurrentPassword ? 'text' : 'password'"
                 :rules="[val => !!val || 'Current password is required']"
@@ -33,6 +34,7 @@
               <q-input
                 filled
                 v-model="formData.newPassword"
+                ref="newPasswordRef"
                 label="New Password *"
                 :type="showNewPassword ? 'text' : 'password'"
                 :rules="[
@@ -56,6 +58,7 @@
               <q-input
                 filled
                 v-model="formData.confirmNewPassword"
+                ref="confirmNewPasswordRef"
                 label="Confirm New Password *"
                 :type="showConfirmPassword ? 'text' : 'password'"
                 :rules="[
@@ -109,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from 'src/stores/auth-store'
 
@@ -120,6 +123,10 @@ const loading = ref(false)
 const showCurrentPassword = ref(false)
 const showNewPassword = ref(false)
 const showConfirmPassword = ref(false)
+
+const currentPasswordRef = ref(null)
+const newPasswordRef = ref(null)
+const confirmNewPasswordRef = ref(null)
 
 const formData = ref({
   currentPassword: '',
@@ -138,7 +145,8 @@ const onSubmit = async () => {
     // Call the auth store to change password
     await authStore.changePassword({
       current_password: formData.value.currentPassword,
-      new_password: formData.value.newPassword
+      new_password: formData.value.newPassword,
+      user_id: authStore.userId
     })
 
     // Reset form on success
@@ -147,6 +155,19 @@ const onSubmit = async () => {
       newPassword: '',
       confirmNewPassword: ''
     }
+
+    // Wait for DOM updates
+    await nextTick()
+
+    // Remove focus from QInput components
+    currentPasswordRef.value?.resetValidation()
+    newPasswordRef.value?.resetValidation()
+    confirmNewPasswordRef.value?.resetValidation()
+
+    // Explicitly blur the native input elements
+    currentPasswordRef.value?.$el.querySelector('input')?.blur()
+    newPasswordRef.value?.$el.querySelector('input')?.blur()
+    confirmNewPasswordRef.value?.$el.querySelector('input')?.blur()
 
     $q.notify({
       type: 'positive',
