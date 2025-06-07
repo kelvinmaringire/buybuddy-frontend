@@ -3,8 +3,9 @@
     {
       "appId": "c8dda030",
       "dependencyInstallCommand": "yarn install",
-      "webBuildCommand": "yarn quasar build -m capacitor -T android",
-      "androidPath": "src-capacitor/android"
+      "webBuildCommand": "quasar build -m capacitor -T android",
+      "androidPath": "src-capacitor/android",
+      "prebuildCommand": "yarn global add @quasar/cli"
     }
   ]
 }
