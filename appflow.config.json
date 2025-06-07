@@ -1,17 +1,10 @@
 {
-  "apps":
-    [
-        {
-            "appId": "c8dda030",
-            "dependencyInstallCommand": "pnpm i",
-            "webBuildCommand": "pnpm quasar build -m capacitor -T android",
-            "androidPath": "src-capacitor/android"
-        },
-        {
-            "appId": "c8dda030",
-            "dependencyInstallCommand": "pnpm i",
-            "webBuildCommand": "pnpm quasar build -m capacitor -T ios",
-            "iosPath": "src-capacitor/ios"
-        }
-    ]
+  "apps": [
+    {
+      "appId": "co.za.buybuddy.app",
+      "dependencyInstallCommand": "yarn install",
+      "webBuildCommand": "quasar build -m capacitor -T android -d",
+      "androidPath": "src-capacitor/android"
+    }
+  ]
 }
