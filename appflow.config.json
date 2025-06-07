@@ -1,9 +1,9 @@
 {
   "apps": [
     {
-      "appId": "co.za.buybuddy.app",
+      "appId": "c8dda030",
       "dependencyInstallCommand": "yarn install",
-      "webBuildCommand": "quasar build -m capacitor -T android -d",
+      "webBuildCommand": "quasar build -m capacitor -T android",
       "androidPath": "src-capacitor/android"
     }
   ]
